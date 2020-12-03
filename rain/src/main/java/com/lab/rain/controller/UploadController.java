@@ -3,7 +3,9 @@ package com.lab.rain.controller;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
+import com.lab.rain.service.BuildProjectService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,8 +31,11 @@ public class UploadController {
     @Value("${spring.servlet.multipart.location}")
     private String fileTempPath;
 
+    @Autowired
+    private BuildProjectService buildProjectService;
+
     @PostMapping(value = "/local", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Dict local(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+    public Dict local(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return Dict.create().set("code", 400).set("message", "empty");
         }
@@ -44,8 +49,10 @@ public class UploadController {
             log.error("【文件上传至本地】失败，绝对路径：{}", localFilePath);
             return Dict.create().set("code", 500).set("message", "fail");
         }
-
         log.info("【文件上传至本地】绝对路径：{}", localFilePath);
+
+        buildProjectService.buildRinexProject(rawFileName);
+
         return Dict.create().set("code", 200).set("message", "success").set("data", Dict.create().set("fileName", fileName).set("filePath", localFilePath));
     }
 }

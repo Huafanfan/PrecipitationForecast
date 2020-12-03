@@ -3,10 +3,5 @@ server:
   servlet:
     context-path: /rain
 spring:
-  servlet:
-    multipart:
-      enabled: true
-      location: /root/java/tmp
-      file-size-threshold: 0
-      max-file-size: 200MB
-      max-request-size: 200MB
+  profiles:
+    active: dev

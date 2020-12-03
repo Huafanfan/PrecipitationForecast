@@ -1,0 +1,8 @@
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 0
+      max-file-size: 200MB
+      max-request-size: 200MB
+      location: /Users/alex/IdeaProjects/PrecipitationForecast/tmpFile
