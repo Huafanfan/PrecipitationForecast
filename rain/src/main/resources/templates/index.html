@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport"
+	      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>spring-boot-demo-upload</title>
+	<!-- import Vue.js -->
+	<script src="https://cdn.bootcss.com/vue/2.5.17/vue.min.js"></script>
+	<!-- import stylesheet -->
+	<link href="https://cdn.bootcss.com/iview/3.1.4/styles/iview.css" rel="stylesheet">
+	<!-- import iView -->
+	<script src="https://cdn.bootcss.com/iview/3.1.4/iview.min.js"></script>
+</head>
+<body>
+	<div>
+		<form role="form" action="/rain/upload/local" method="POST" enctype="multipart/form-data">
+			<input type="file" name="file" multiple>
+			<button type="submit">Upload</button>
+		</form>
+	</div>
+</body>
+</html>
