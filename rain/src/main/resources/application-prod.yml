@@ -4,3 +4,5 @@ spring:
       location: /root/java/rinex
 logging:
   config: classpath:log4j2_prod.xml
+table:
+  location: /root/java/table

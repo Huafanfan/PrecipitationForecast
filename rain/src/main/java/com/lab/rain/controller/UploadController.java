@@ -51,7 +51,13 @@ public class UploadController {
         }
         log.info("【文件上传至本地】绝对路径：{}", localFilePath);
 
-        buildProjectService.buildRinexProject(rawFileName);
+        buildProjectService.updateTable();
+        //if (buildProjectService.buildRinexProject(rawFileName)){
+        //    buildProjectService.updateTable();
+        //}
+        //else {
+        //    return Dict.create().set("code", 500).set("message", "build project failed");
+        //}
 
         return Dict.create().set("code", 200).set("message", "success").set("data", Dict.create().set("fileName", fileName).set("filePath", localFilePath));
     }

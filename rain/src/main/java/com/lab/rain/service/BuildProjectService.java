@@ -6,5 +6,6 @@ package com.lab.rain.service;
  * @date 2020/12/3 17:19
  */
 public interface BuildProjectService {
-    void buildRinexProject(String rinexFile);
+    boolean buildRinexProject(String rinexFile);
+    boolean updateTable();
 }
