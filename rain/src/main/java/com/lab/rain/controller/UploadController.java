@@ -34,7 +34,7 @@ public class UploadController {
     @Autowired
     private BuildProjectService buildProjectService;
 
-    @PostMapping(value = "/local", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/rinex", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Dict local(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return Dict.create().set("code", 400).set("message", "empty");
