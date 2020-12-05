@@ -11,3 +11,16 @@ spring:
       file-size-threshold: 0
       max-file-size: 200MB
       max-request-size: 200MB
+ftp:
+  host: 141.74.33.23
+  port: 21
+  username: anonymous
+  basepath: IGS/obs/
+city:
+  cityList:
+    - 'wuh2'
+    - 'jfng'
+    - 'lhaz'
+    - 'ncku'
+    - 'twtf'
+    - 'urum'

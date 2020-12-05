@@ -2,11 +2,16 @@ package com.lab.rain.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.lab.rain.service.BuildProjectService;
+import com.lab.rain.utils.FTPUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * @author Alex
@@ -15,10 +20,19 @@ import java.io.*;
  */
 @Slf4j
 @Service
+@ConfigurationProperties(prefix = "city")
 public class BuildProjectServiceImpl implements BuildProjectService {
 
     @Value("${table.location}")
     private String tablePath;
+
+    @Value("${spring.servlet.multipart.location}")
+    private String rinexPath;
+
+    @Autowired
+    private FTPUtil ftpUtil;
+
+    private List<String> cityList;
 
     @Override
     public boolean buildRinexProject(String rinexFile) {
@@ -26,14 +40,8 @@ public class BuildProjectServiceImpl implements BuildProjectService {
         String time = rinexFileNames[2];
         String year = time.substring(0,4);
         String doy = time.substring(4,7);
-        String[] cmd={"sh_setup -yr " + year + " -doy " + doy,
-                "cp rinexDepository/jfng"+doy+"* rinex/",
-                "cp rinexDepository/lhaz"+doy+"* rinex/",
-                "cp rinexDepository/ncku"+doy+"* rinex/",
-                "cp rinexDepository/twtf"+doy+"* rinex/",
-                "cp rinexDepository/urum"+doy+"* rinex/"};
+        String cmd="sh_setup -yr " + year + " -doy " + doy;
         Runtime run = Runtime.getRuntime();
-        //返回与当前 Java 应用程序相关的运行时对象
         try {
             Process p = run.exec(cmd);
             if (p.waitFor() != 0) {
@@ -42,12 +50,67 @@ public class BuildProjectServiceImpl implements BuildProjectService {
                     return false;
                 }
             }
+            //for (int i=0)
             return true;
         }
         catch (Exception e) {
             log.error(e.getMessage());
             return false;
         }
+    }
+
+    @Override
+    public boolean downloadRinex(String rinexFile) {
+        String year = null;
+        String doy = null;
+        if (rinexFile.endsWith("o")) {
+            year = String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
+            doy = rinexFile.substring(4, 7);
+        }
+        else {
+            String[] rinexFileNames = rinexFile.split("_");
+            String time = rinexFileNames[2];
+            year = time.substring(0, 4);
+            doy = time.substring(4, 7);
+        }
+        String sourcePosition = rinexFile.substring(0,4).toLowerCase();
+        String ftpPath = null;
+        String fileName = null;
+        String savePath = null;
+        for (String position : cityList) {
+            if (!position.equals(sourcePosition)) {
+                if ("ncku".equals(position) || "twtf".equals(position)){
+                    ftpPath = year + "/" + doy + "/";
+                    fileName = position.toUpperCase()+"00TWN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
+                    savePath = rinexPath;
+                    ftpUtil.downloadFiles(ftpPath, fileName, savePath);
+                }
+                else {
+                    ftpPath = year + "/" + doy + "/";
+                    fileName = position.toUpperCase()+"00CHN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
+                    savePath = rinexPath;
+                    ftpUtil.downloadFiles(ftpPath, fileName, savePath);
+                }
+            }
+        }
+
+        File rinexDic = new File(rinexPath);
+        String[] files = rinexDic.list();
+        for (String file : files) {
+            File tempFile = new File(rinexPath + "/" + file);
+            if (tempFile.getName().endsWith(".gz")) {
+                String cmd = "gzip -d " + tempFile.getAbsolutePath();
+                if (!executeCmd(cmd)) {
+                    System.out.println("gzip fail");
+                }
+                cmd = rinexPath + "/crx2rnx " + tempFile.getAbsolutePath();
+                if (!executeCmd(cmd)) {
+                    System.out.println("crx2rnx fail");
+                }
+            }
+
+        }
+        return false;
     }
 
     @Override
@@ -103,5 +166,27 @@ public class BuildProjectServiceImpl implements BuildProjectService {
             return false;
         }
         return false;
+    }
+
+    public void setCityList(List<String> cityList) {
+        this.cityList = cityList;
+    }
+
+    public boolean executeCmd(String cmd) {
+        Runtime run = Runtime.getRuntime();
+        try {
+            Process p = run.exec(cmd);
+            if (p.waitFor() != 0) {
+                if (p.exitValue() == 0){
+                    log.error("命令执行失败!");
+                    return false;
+                }
+            }
+        }
+        catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
+        }
+        return true;
     }
 }

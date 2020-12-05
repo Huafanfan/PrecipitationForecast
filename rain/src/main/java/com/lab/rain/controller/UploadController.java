@@ -42,7 +42,7 @@ public class UploadController {
         String fileName = file.getOriginalFilename();
         String rawFileName = StrUtil.subBefore(fileName, ".", true);
         String fileType = StrUtil.subAfter(fileName, ".", true);
-        String localFilePath = StrUtil.appendIfMissing(fileTempPath, "/") + rawFileName + "-" + DateUtil.current(false) + "." + fileType;
+        String localFilePath = StrUtil.appendIfMissing(fileTempPath, "/") + rawFileName + "." + fileType;
         try {
             file.transferTo(new File(localFilePath));
         } catch (IOException e) {
@@ -51,7 +51,8 @@ public class UploadController {
         }
         log.info("【文件上传至本地】绝对路径：{}", localFilePath);
 
-        buildProjectService.updateTable();
+        buildProjectService.downloadRinex(rawFileName);
+        //buildProjectService.updateTable();
         //if (buildProjectService.buildRinexProject(rawFileName)){
         //    buildProjectService.updateTable();
         //}
