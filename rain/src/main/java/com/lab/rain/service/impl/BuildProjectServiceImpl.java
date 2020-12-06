@@ -29,6 +29,9 @@ public class BuildProjectServiceImpl implements BuildProjectService {
     @Value("${spring.servlet.multipart.location}")
     private String rinexPath;
 
+    @Value("${vmf1.data}")
+    private String vmf1;
+
     @Autowired
     private FTPUtil ftpUtil;
 
@@ -36,27 +39,21 @@ public class BuildProjectServiceImpl implements BuildProjectService {
 
     @Override
     public boolean buildRinexProject(String rinexFile) {
-        String[] rinexFileNames = rinexFile.split("_");
-        String time = rinexFileNames[2];
-        String year = time.substring(0,4);
-        String doy = time.substring(4,7);
+        log.info("buildRinexProject rinexFile:{}", rinexFile);
+        String year = null;
+        String doy = null;
+        if (rinexFile.endsWith("o")) {
+            year = String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
+            doy = rinexFile.substring(4, 7);
+        }
+        else {
+            String[] rinexFileNames = rinexFile.split("_");
+            String time = rinexFileNames[2];
+            year = time.substring(0, 4);
+            doy = time.substring(4, 7);
+        }
         String cmd="sh_setup -yr " + year + " -doy " + doy;
-        Runtime run = Runtime.getRuntime();
-        try {
-            Process p = run.exec(cmd);
-            if (p.waitFor() != 0) {
-                if (p.exitValue() == 1){
-                    log.error("命令执行失败!");
-                    return false;
-                }
-            }
-            //for (int i=0)
-            return true;
-        }
-        catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
-        }
+        return executeCmd(cmd);
     }
 
     @Override
@@ -73,48 +70,86 @@ public class BuildProjectServiceImpl implements BuildProjectService {
             year = time.substring(0, 4);
             doy = time.substring(4, 7);
         }
-        String sourcePosition = rinexFile.substring(0,4).toLowerCase();
-        String ftpPath = null;
-        String fileName = null;
-        String savePath = null;
-        for (String position : cityList) {
-            if (!position.equals(sourcePosition)) {
-                if ("ncku".equals(position) || "twtf".equals(position)){
-                    ftpPath = year + "/" + doy + "/";
-                    fileName = position.toUpperCase()+"00TWN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
-                    savePath = rinexPath;
-                    ftpUtil.downloadFiles(ftpPath, fileName, savePath);
-                }
-                else {
-                    ftpPath = year + "/" + doy + "/";
-                    fileName = position.toUpperCase()+"00CHN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
-                    savePath = rinexPath;
-                    ftpUtil.downloadFiles(ftpPath, fileName, savePath);
-                }
-            }
-        }
-
+        //String sourcePosition = rinexFile.substring(0,4).toLowerCase();
+        //String ftpPath = null;
+        //String fileName = null;
+        //String savePath = null;
+        //for (String position : cityList) {
+        //    if (!position.equals(sourcePosition)) {
+        //        if ("ncku".equals(position) || "twtf".equals(position)){
+        //            ftpPath = year + "/" + doy + "/";
+        //            fileName = position.toUpperCase()+"00TWN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
+        //            savePath = rinexPath;
+        //            ftpUtil.downloadFiles(ftpPath, fileName, savePath);
+        //        }
+        //        else {
+        //            ftpPath = year + "/" + doy + "/";
+        //            fileName = position.toUpperCase()+"00CHN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
+        //            savePath = rinexPath;
+        //            ftpUtil.downloadFiles(ftpPath, fileName, savePath);
+        //        }
+        //    }
+        //}
+        String cmd = null;
         File rinexDic = new File(rinexPath);
         String[] files = rinexDic.list();
         for (String file : files) {
             File tempFile = new File(rinexPath + "/" + file);
             if (tempFile.getName().endsWith(".gz")) {
-                String cmd = "gzip -d " + tempFile.getAbsolutePath();
+                cmd = "gzip -d " + tempFile.getAbsolutePath();
                 if (!executeCmd(cmd)) {
-                    System.out.println("gzip fail");
+                    log.error("gzip fail");
+                    return false;
                 }
-                cmd = rinexPath + "/crx2rnx " + tempFile.getAbsolutePath();
+                cmd = rinexPath + "/crx2rnx " + tempFile.getAbsolutePath().replace(".gz","");
                 if (!executeCmd(cmd)) {
-                    System.out.println("crx2rnx fail");
+                    log.error("crx2rnx fail");
+                    return false;
+                }
+                cmd = "rm -f " + tempFile.getAbsolutePath().replace(".gz","");
+                if (!executeCmd(cmd)) {
+                    log.error("rm fail");
+                    return false;
                 }
             }
-
         }
-        return false;
+
+        cmd = "sh_rename_rinex3 -f *.rnx -r";
+        if (!executeCmd(cmd,null,new File("rinex/"))) {
+            log.error("sh_rename_rinex3 fail");
+            return false;
+        }
+
+        cmd = "rm -f tables/map.grid";
+        if (!executeCmd(cmd)) {
+            log.error("rm -f tables/map.grid fail");
+            return false;
+        }
+
+        cmd = "ln -s ~/gg/tables/vmf1grd." + vmf1 + " tables/map.grid";
+        if (!executeCmd(cmd)) {
+            log.error("ln -s fail");
+            return false;
+        }
+
+        cmd = "sh_gamit -expt demo -d " + year + " " + doy + " -orbit codm -met -metutil Z -gnss G";
+        if (!executeCmd(cmd)) {
+            log.error("sh_gamit G fail");
+            return false;
+        }
+
+        cmd = "sh_gamit -expt demo -d " + year + " " + doy + " -orbit codm -met -metutil Z -gnss C";
+        if (!executeCmd(cmd)) {
+            log.error("sh_gamit C fail");
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public boolean updateTable() {
+        log.info("updateTable");
         try {
             File sourceFile = new File(StrUtil.appendIfMissing(tablePath, "/") + "sestbl.");
             BufferedReader in = new BufferedReader(new FileReader(sourceFile));
@@ -173,9 +208,13 @@ public class BuildProjectServiceImpl implements BuildProjectService {
     }
 
     public boolean executeCmd(String cmd) {
+        return executeCmd(cmd, null, null);
+    }
+    public boolean executeCmd(String cmd, String[] envp, File dir) {
+        log.info("execute {} {} {}", cmd, envp, dir);
         Runtime run = Runtime.getRuntime();
         try {
-            Process p = run.exec(cmd);
+            Process p = run.exec(cmd, envp, dir);
             if (p.waitFor() != 0) {
                 if (p.exitValue() == 0){
                     log.error("命令执行失败!");

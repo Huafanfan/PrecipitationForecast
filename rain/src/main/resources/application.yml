@@ -4,7 +4,7 @@ server:
     context-path: /rain
 spring:
   profiles:
-    active: dev
+    active: prod
   servlet:
     multipart:
       enabled: true
@@ -24,3 +24,5 @@ city:
     - 'ncku'
     - 'twtf'
     - 'urum'
+vmf1:
+  data: 2020_276

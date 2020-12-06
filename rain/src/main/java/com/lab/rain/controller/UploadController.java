@@ -51,14 +51,23 @@ public class UploadController {
         }
         log.info("【文件上传至本地】绝对路径：{}", localFilePath);
 
-        buildProjectService.downloadRinex(rawFileName);
-        //buildProjectService.updateTable();
-        //if (buildProjectService.buildRinexProject(rawFileName)){
-        //    buildProjectService.updateTable();
-        //}
-        //else {
-        //    return Dict.create().set("code", 500).set("message", "build project failed");
-        //}
+        //buildProjectService.downloadRinex(rawFileName);
+        if (buildProjectService.buildRinexProject(rawFileName)){
+            if (buildProjectService.updateTable()){
+                if (buildProjectService.downloadRinex(rawFileName)){
+
+                }
+                else {
+                    return Dict.create().set("code", 500).set("message", "download rinex failed");
+                }
+            }
+            else {
+                return Dict.create().set("code", 500).set("message", "update table failed");
+            }
+        }
+        else {
+            return Dict.create().set("code", 500).set("message", "build project failed");
+        }
 
         return Dict.create().set("code", 200).set("message", "success").set("data", Dict.create().set("fileName", fileName).set("filePath", localFilePath));
     }
