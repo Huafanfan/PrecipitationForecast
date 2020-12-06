@@ -40,8 +40,8 @@ public class BuildProjectServiceImpl implements BuildProjectService {
     @Override
     public boolean buildRinexProject(String rinexFile) {
         log.info("buildRinexProject rinexFile:{}", rinexFile);
-        String year = null;
-        String doy = null;
+        String year;
+        String doy;
         if (rinexFile.endsWith("o")) {
             year = String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
             doy = rinexFile.substring(4, 7);
@@ -58,8 +58,8 @@ public class BuildProjectServiceImpl implements BuildProjectService {
 
     @Override
     public boolean downloadRinex(String rinexFile) {
-        String year = null;
-        String doy = null;
+        String year;
+        String doy;
         if (rinexFile.endsWith("o")) {
             year = String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
             doy = rinexFile.substring(4, 7);
@@ -70,27 +70,27 @@ public class BuildProjectServiceImpl implements BuildProjectService {
             year = time.substring(0, 4);
             doy = time.substring(4, 7);
         }
-        //String sourcePosition = rinexFile.substring(0,4).toLowerCase();
-        //String ftpPath = null;
-        //String fileName = null;
-        //String savePath = null;
-        //for (String position : cityList) {
-        //    if (!position.equals(sourcePosition)) {
-        //        if ("ncku".equals(position) || "twtf".equals(position)){
-        //            ftpPath = year + "/" + doy + "/";
-        //            fileName = position.toUpperCase()+"00TWN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
-        //            savePath = rinexPath;
-        //            ftpUtil.downloadFiles(ftpPath, fileName, savePath);
-        //        }
-        //        else {
-        //            ftpPath = year + "/" + doy + "/";
-        //            fileName = position.toUpperCase()+"00CHN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
-        //            savePath = rinexPath;
-        //            ftpUtil.downloadFiles(ftpPath, fileName, savePath);
-        //        }
-        //    }
-        //}
-        String cmd = null;
+        String sourcePosition = rinexFile.substring(0,4).toLowerCase();
+        String ftpPath;
+        String fileName;
+        String savePath;
+        for (String position : cityList) {
+            if (!position.equals(sourcePosition)) {
+                if ("ncku".equals(position) || "twtf".equals(position)){
+                    ftpPath = year + "/" + doy + "/";
+                    fileName = position.toUpperCase()+"00TWN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
+                    savePath = rinexPath;
+                    ftpUtil.downloadFiles(ftpPath, fileName, savePath);
+                }
+                else {
+                    ftpPath = year + "/" + doy + "/";
+                    fileName = position.toUpperCase()+"00CHN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
+                    savePath = rinexPath;
+                    ftpUtil.downloadFiles(ftpPath, fileName, savePath);
+                }
+            }
+        }
+        String cmd;
         File rinexDic = new File(rinexPath);
         String[] files = rinexDic.list();
         for (String file : files) {
@@ -157,8 +157,8 @@ public class BuildProjectServiceImpl implements BuildProjectService {
             File targetFile = new File(StrUtil.appendIfMissing(tablePath, "/") + "sestbl.update");
             BufferedWriter out = new BufferedWriter(new FileWriter(targetFile));
 
-            String line = null;
-            String newLine = null;
+            String line;
+            String newLine;
             while ((line=in.readLine())!=null) {
                 if (line.startsWith("Met obs source = UFL GPT 50")) {
                     newLine = line.substring(0, 17) + "RNX " + line.substring(17);
