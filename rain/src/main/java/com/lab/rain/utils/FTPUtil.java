@@ -127,7 +127,8 @@ public class FTPUtil {
                     }
                 }
             } catch (IOException e) {
-                logger.error("下载文件失败", e);
+                log.error("下载文件失败:{}", fileName);
+                //logger.error("下载文件失败", e);
             } finally {
                 closeConnect();
             }

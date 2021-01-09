@@ -1,39 +1,25 @@
 package com.lab.rain;
-
-import com.lab.rain.utils.FTPUtil;
-import org.apache.commons.net.ftp.FTPClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 @SpringBootTest
 class RainApplicationTests {
 
-	@Autowired
-	private FTPUtil ftpUtil;
+
 
 	@Test
-	void contextLoads() {
-		//ftpUtil.downloadFiles("2020/020/", "ABMF00GLP_R_20200200000_01D_30S_MO.crx.gz", "/Users/alex/IdeaProjects/PrecipitationForecast/tmpFile");
-		String cmd = "ls";
-		Runtime run = Runtime.getRuntime();
-		try {
-			System.out.println(cmd);
-			Process p = run.exec(cmd, null, new File("/Users/alex"));
-			if (p.waitFor() != 0) {
-				if (p.exitValue() == 1){
-					System.out.println("命令执行失败!");
-				}
-			}
-		}
-		catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+	void contextLoads() throws IOException {
 	}
 
 

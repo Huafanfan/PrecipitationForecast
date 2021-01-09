@@ -203,6 +203,32 @@ public class BuildProjectServiceImpl implements BuildProjectService {
         return false;
     }
 
+    @Override
+    public boolean downloadRinexBatch(String year) {
+        String ftpPath;
+        String fileName;
+        String savePath;
+        for (int i=113; i<=173; i++){
+            String doy = String.valueOf(i);
+            for (String position : cityList) {
+                if ("ncku".equals(position) || "twtf".equals(position)){
+                    ftpPath = year + "/" + doy + "/";
+                    fileName = position.toUpperCase()+"00TWN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
+                    savePath = rinexPath;
+                    ftpUtil.downloadFiles(ftpPath, fileName, savePath);
+                }
+                else {
+                    ftpPath = year + "/" + doy + "/";
+                    fileName = position.toUpperCase()+"00CHN_R_"+year+doy+"0000_01D_30S_MO.crx.gz";
+                    savePath = rinexPath;
+                    ftpUtil.downloadFiles(ftpPath, fileName, savePath);
+                }
+                log.info("{} success", fileName);
+            }
+        }
+        return true;
+    }
+
     public void setCityList(List<String> cityList) {
         this.cityList = cityList;
     }

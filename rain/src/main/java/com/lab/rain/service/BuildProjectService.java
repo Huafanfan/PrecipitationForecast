@@ -13,4 +13,6 @@ public interface BuildProjectService {
 
     boolean updateTable();
 
+    boolean downloadRinexBatch(String year);
+
 }
