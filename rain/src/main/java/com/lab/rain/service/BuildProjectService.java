@@ -13,6 +13,6 @@ public interface BuildProjectService {
 
     boolean updateTable();
 
-    boolean downloadRinexBatch(String year);
+    boolean downloadRinexBatch(String year, String doyStart, String doyEnd);
 
 }

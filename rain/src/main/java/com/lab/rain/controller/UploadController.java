@@ -70,8 +70,8 @@ public class UploadController {
     }
 
     @GetMapping(value = "/download")
-    public Dict download(@RequestParam(required = false, name = "year") String year){
-        buildProjectService.downloadRinexBatch(year);
+    public Dict download(@RequestParam(required = false, name = "year") String year, @RequestParam(required = false, name = "doyStart") String doyStart, @RequestParam(required = false, name = "doyEnd") String doyEnd){
+        buildProjectService.downloadRinexBatch(year, doyStart, doyEnd);
         return Dict.create().set("code", 200).set("message", "success");
     }
 }

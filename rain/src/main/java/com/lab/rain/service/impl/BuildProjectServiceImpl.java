@@ -204,11 +204,11 @@ public class BuildProjectServiceImpl implements BuildProjectService {
     }
 
     @Override
-    public boolean downloadRinexBatch(String year) {
+    public boolean downloadRinexBatch(String year, String doyStart, String doyEnd) {
         String ftpPath;
         String fileName;
         String savePath;
-        for (int i=113; i<=173; i++){
+        for (int i=Integer.parseInt(doyStart); i<=Integer.parseInt(doyEnd); i++){
             String doy = String.valueOf(i);
             for (String position : cityList) {
                 if ("ncku".equals(position) || "twtf".equals(position)){
