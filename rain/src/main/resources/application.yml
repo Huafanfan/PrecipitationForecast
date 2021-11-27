@@ -4,13 +4,17 @@ server:
     context-path: /rain
 spring:
   profiles:
-    active: dev
+    active: prod
   servlet:
     multipart:
       enabled: true
       file-size-threshold: 0
       max-file-size: 200MB
       max-request-size: 200MB
+  dubbo:
+    application:
+      name: spring-boot-demo-dubbo-provider
+      registry: zookeeper://42.193.107.218:2181
 ftp:
   host: 141.74.33.23
   port: 21

@@ -100,6 +100,7 @@ public class FTPUtil {
     public boolean downloadFiles(String ftpPath, String fileName, String savePath) {
         // 登录
         login(ftpAddress, ftpPort, ftpUsername, ftpPassword);
+        boolean isHave = false;
         if (ftpClient != null) {
             try {
                 String path = changeEncoding(basePath + ftpPath);
@@ -118,9 +119,11 @@ public class FTPUtil {
                 for (String ff : fs) {
                     String ftpName = new String(ff.getBytes(serverCharset), localCharset);
                     if (ftpName.equals(fileName)){
-                        File file = new File(savePath + '/' + ftpName);
+                        File file = new File(savePath + "/" + ftpName);
+                        logger.info("下载文件地址:{}", file.getAbsolutePath());
                         try (OutputStream os = new FileOutputStream(file)) {
                             ftpClient.retrieveFile(ff, os);
+                            isHave = true;
                         } catch (Exception e) {
                             logger.error(e.getMessage(), e);
                         }
@@ -133,7 +136,7 @@ public class FTPUtil {
                 closeConnect();
             }
         }
-        return Boolean.TRUE;
+        return isHave;
     }
 
     /**

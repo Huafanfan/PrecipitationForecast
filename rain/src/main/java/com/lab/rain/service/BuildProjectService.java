@@ -7,12 +7,12 @@ package com.lab.rain.service;
  */
 public interface BuildProjectService {
 
-    boolean buildRinexProject(String rinexFile);
-
-    boolean downloadRinex(String rinexFile);
-
-    boolean updateTable();
-
-    boolean downloadRinexBatch(String year, String doyStart, String doyEnd);
+    //boolean buildRinexProject(String rinexFile);
+    //
+    //boolean downloadRinex(String rinexFile);
+    //
+    //boolean updateTable();
+    //
+    //boolean downloadRinexBatch(String year, String doyStart, String doyEnd);
 
 }

@@ -14,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alex
@@ -28,10 +30,7 @@ public class UploadController {
     @Value("${spring.servlet.multipart.location}")
     private String fileTempPath;
 
-    @Autowired
-    private BuildProjectService buildProjectService;
-
-    @PostMapping(value = "/rinex", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/baseFiles", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Dict local(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return Dict.create().set("code", 400).set("message", "empty");
@@ -42,36 +41,20 @@ public class UploadController {
         String localFilePath = StrUtil.appendIfMissing(fileTempPath, "/") + rawFileName + "." + fileType;
         try {
             file.transferTo(new File(localFilePath));
+            //file.transferTo(new File(localFilePathBd));
         } catch (IOException e) {
             log.error("【文件上传至本地】失败，绝对路径：{}", localFilePath);
+            //log.error("【文件上传至本地】失败，绝对路径：{}", localFilePathBd);
             return Dict.create().set("code", 500).set("message", "fail");
         }
         log.info("【文件上传至本地】绝对路径：{}", localFilePath);
-
-        //buildProjectService.downloadRinex(rawFileName);
-        if (buildProjectService.buildRinexProject(rawFileName)){
-            if (buildProjectService.updateTable()){
-                if (buildProjectService.downloadRinex(rawFileName)){
-
-                }
-                else {
-                    return Dict.create().set("code", 500).set("message", "download rinex failed");
-                }
-            }
-            else {
-                return Dict.create().set("code", 500).set("message", "update table failed");
-            }
-        }
-        else {
-            return Dict.create().set("code", 500).set("message", "build project failed");
-        }
-
+        //log.info("【文件上传至本地】绝对路径：{}", localFilePathBd);
         return Dict.create().set("code", 200).set("message", "success").set("data", Dict.create().set("fileName", fileName).set("filePath", localFilePath));
     }
 
-    @GetMapping(value = "/download")
-    public Dict download(@RequestParam(required = false, name = "year") String year, @RequestParam(required = false, name = "doyStart") String doyStart, @RequestParam(required = false, name = "doyEnd") String doyEnd){
-        buildProjectService.downloadRinexBatch(year, doyStart, doyEnd);
-        return Dict.create().set("code", 200).set("message", "success");
-    }
+    //@GetMapping(value = "/download")
+    //public Dict download(@RequestParam(required = false, name = "year") String year, @RequestParam(required = false, name = "doyStart") String doyStart, @RequestParam(required = false, name = "doyEnd") String doyEnd){
+    //    buildProjectService.downloadRinexBatch(year, doyStart, doyEnd);
+    //    return Dict.create().set("code", 200).set("message", "success");
+    //}
 }
